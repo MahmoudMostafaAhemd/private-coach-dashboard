@@ -746,7 +746,7 @@
 
         async function callGeminiProxy(base64Data, mimeType) {
             const endpoint = (appConfig.GEMINI_PROXY_URL || "").trim();
-            const model = (appConfig.GEMINI_MODEL || "gemini-2.5-flash").trim();
+            const model = (appConfig.GEMINI_MODEL || "gemini-3-flash-preview").trim();
             
             if (!endpoint) {
                 throw new Error("Missing GEMINI_PROXY_URL.");

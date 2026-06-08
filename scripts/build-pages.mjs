@@ -2,7 +2,7 @@ import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 
 const config = {
   GEMINI_PROXY_URL: process.env.GEMINI_PROXY_URL || "",
-  GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.5-flash"
+  GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-3-flash-preview"
 };
 
 await rm("dist", { recursive: true, force: true });

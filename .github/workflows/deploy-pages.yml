@@ -33,7 +33,7 @@ jobs:
       - name: Build static site
         env:
           GEMINI_PROXY_URL: ${{ secrets.GEMINI_PROXY_URL }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3-flash-preview' }}
         run: npm run build
 
       - name: Upload artifact
