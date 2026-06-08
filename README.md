@@ -15,7 +15,13 @@ GitHub Pages is a static host, so a Gemini API key cannot be kept private inside
 
 Set the actual Gemini API key in your backend/proxy service, not in this GitHub Pages app. Use an environment secret named `GEMINI_API_KEY` in that backend service, for example a Cloudflare Worker secret, Netlify environment variable, Vercel environment variable, or a private server environment variable.
 
-In this repository, create a GitHub Actions secret named `GEMINI_PROXY_URL` with the URL of that serverless endpoint. The dashboard posts:
+The dashboard is configured to use this Supabase Edge Function endpoint:
+
+```text
+https://gomvlijafqagznoexdsx.supabase.co/functions/v1/gemini-proxy
+```
+
+If you change proxy providers later, create a GitHub Actions secret named `GEMINI_PROXY_URL` with the replacement endpoint. The dashboard posts:
 
 ```json
 {
@@ -41,7 +47,7 @@ Optionally add a repository variable named `GEMINI_MODEL`; otherwise the workflo
 
 1. Create a GitHub repository and push this project to `main`.
 2. In the repository, open `Settings > Secrets and variables > Actions`.
-3. Add the `GEMINI_PROXY_URL` secret.
+3. Add `GEMINI_API_KEY` to the Supabase project Edge Function secrets.
 4. Open `Settings > Pages` and set the source to `GitHub Actions`.
 5. Push to `main`, or run the `Deploy GitHub Pages` workflow manually.
 

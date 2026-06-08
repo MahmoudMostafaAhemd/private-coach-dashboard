@@ -1,7 +1,9 @@
 import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 
 const config = {
-  GEMINI_PROXY_URL: process.env.GEMINI_PROXY_URL || "",
+  GEMINI_PROXY_URL:
+    process.env.GEMINI_PROXY_URL ||
+    "https://gomvlijafqagznoexdsx.supabase.co/functions/v1/gemini-proxy",
   GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-3-flash-preview"
 };
 
