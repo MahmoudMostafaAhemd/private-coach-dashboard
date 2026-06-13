@@ -6,18 +6,22 @@
     <title>Private Coach Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ink: #102027;
-            --muted: #64748b;
-            --line: #dbe8ec;
-            --paper: #f7fbfc;
+            --ink: #191714;
+            --muted: #6d675f;
+            --line: #dedbd4;
+            --paper: #fbfaf7;
             --panel: #ffffff;
-            --cyan: #0891b2;
-            --emerald: #059669;
-            --amber: #d97706;
-            --rose: #e11d48;
+            --graphite: #24211d;
+            --green: #147a50;
+            --lime: #d9ff68;
+            --blue: #315cfd;
+            --rose: #be123c;
+            --font-sans: "Thmanyah Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+            --font-display: "Thmanyah Serif Display", "Thmanyah Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
         }
 
         * {
@@ -30,21 +34,22 @@
 
         body {
             min-height: 100vh;
-            background:
-                linear-gradient(180deg, rgba(8, 145, 178, 0.08), rgba(255, 255, 255, 0) 360px),
-                var(--paper);
+            background: var(--paper);
             color: var(--ink);
-            font-family: "Noto Sans Arabic", system-ui, sans-serif;
+            font-family: var(--font-sans);
             letter-spacing: 0;
         }
 
-        h1, h2, h3, .display {
-            font-family: "Noto Naskh Arabic", "Noto Sans Arabic", serif;
+        h1,
+        h2,
+        h3,
+        .display {
+            font-family: var(--font-display);
             letter-spacing: 0;
         }
 
         ::selection {
-            background: rgba(8, 145, 178, 0.22);
+            background: rgba(217, 255, 104, 0.72);
             color: var(--ink);
         }
 
@@ -53,26 +58,196 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #eef6f8;
+            background: #f1eee7;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #b7cdd4;
+            background: #b9b2a7;
             border-radius: 999px;
         }
 
-        .panel {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.07);
+        .app-shell {
+            display: grid;
+            min-height: 100vh;
         }
 
+        .is-hidden {
+            display: none !important;
+        }
+
+        .login-view {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+            background: #11100e;
+            color: #ffffff;
+        }
+
+        .login-photo {
+            position: absolute;
+            inset: 0;
+            background-image: url("https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2200&q=85");
+            background-size: cover;
+            background-position: center;
+            filter: saturate(0.96);
+        }
+
+        .login-photo::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 16, 14, 0.62);
+        }
+
+        .login-layout {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+            gap: 2rem;
+            align-items: center;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .login-copy {
+            align-self: end;
+            max-width: 620px;
+            padding-bottom: 2rem;
+        }
+
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 2.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.45rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.86);
+        }
+
+        .login-title {
+            margin-top: 1.5rem;
+            max-width: 640px;
+            font-size: 3.6rem;
+            line-height: 1.08;
+            font-weight: 900;
+        }
+
+        .login-copy p {
+            margin-top: 1.25rem;
+            max-width: 560px;
+            color: rgba(255, 255, 255, 0.72);
+            line-height: 2;
+            font-size: 1rem;
+        }
+
+        .login-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 2rem;
+            max-width: 560px;
+        }
+
+        .login-stat {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1rem;
+        }
+
+        .login-stat span {
+            display: block;
+            color: rgba(255, 255, 255, 0.56);
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .login-stat strong {
+            display: block;
+            margin-top: 0.45rem;
+            color: #ffffff;
+            font-size: 1.4rem;
+        }
+
+        .login-card {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 8px;
+            background: rgba(251, 250, 247, 0.96);
+            color: var(--ink);
+            padding: 1.35rem;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+        }
+
+        .login-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .login-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 8px;
+            background: var(--ink);
+            color: var(--lime);
+        }
+
+        @media (max-width: 900px) {
+            .login-layout {
+                grid-template-columns: 1fr;
+                align-items: end;
+                padding: 1rem;
+            }
+
+            .login-copy {
+                padding-top: 3rem;
+                padding-bottom: 0;
+            }
+
+            .login-title {
+                font-size: 2.4rem;
+            }
+
+            .login-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .side-rail {
+            background: var(--graphite);
+            color: #fbfaf7;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .workspace {
+            min-width: 0;
+        }
+
+        .panel,
         .metric {
-            background: #ffffff;
+            background: var(--panel);
             border: 1px solid var(--line);
             border-radius: 8px;
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+            box-shadow: none;
+        }
+
+        .metric strong,
+        .metric-value {
+            font-family: var(--font-display);
         }
 
         .icon-box {
@@ -83,8 +258,105 @@
             height: 2.5rem;
             border-radius: 8px;
             border: 1px solid var(--line);
-            background: #f8fcfd;
-            color: var(--cyan);
+            background: #fbfaf7;
+            color: var(--ink);
+        }
+
+        .rail-box {
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .ink-button,
+        .lime-button,
+        .ghost-button {
+            border-radius: 8px;
+            transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+        }
+
+        .ink-button {
+            background: var(--ink);
+            color: #ffffff;
+        }
+
+        .ink-button:hover {
+            background: #000000;
+        }
+
+        .lime-button {
+            background: var(--lime);
+            color: var(--ink);
+        }
+
+        .lime-button:hover {
+            background: #cfff3a;
+        }
+
+        .ghost-button {
+            border: 1px solid var(--line);
+            background: #ffffff;
+            color: var(--ink);
+        }
+
+        .ghost-button:hover {
+            border-color: var(--ink);
+            background: #fbfaf7;
+        }
+
+        .day-button {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #ffffff;
+            transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+        }
+
+        .day-button:hover {
+            border-color: var(--ink);
+            background: #fbfaf7;
+        }
+
+        .day-button.is-active-upper,
+        .day-button.is-active-lower {
+            border-color: var(--ink);
+            background: var(--ink);
+            color: #ffffff;
+        }
+
+        .day-button.is-active-upper .day-muted,
+        .day-button.is-active-lower .day-muted {
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .day-button.is-active-upper .day-icon,
+        .day-button.is-active-lower .day-icon {
+            color: var(--lime);
+        }
+
+        .progress-track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #ece8df;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 8px;
+            background: var(--ink);
+        }
+
+        .rail-progress {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .rail-progress > div {
+            height: 100%;
+            border-radius: 8px;
+            background: var(--lime);
         }
 
         .set-button {
@@ -95,16 +367,154 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            background: #ffffff;
+            color: var(--ink);
             font-weight: 800;
             font-size: 0.8rem;
             transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
         }
 
+        .set-button:hover {
+            border-color: var(--ink);
+        }
+
+        .set-button.is-checked {
+            background: var(--lime);
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+
+        .exercise-video {
+            border: 1px solid #e6e1d8;
+            border-radius: 8px;
+            background: #fbfaf7;
+            padding: 0.85rem;
+        }
+
+        .exercise-video-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .exercise-video-frame {
+            margin-top: 0.75rem;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #141210;
+        }
+
+        .exercise-video-frame iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .exercise-video input {
+            direction: ltr;
+            text-align: left;
+        }
+
         .set-button:focus-visible,
         button:focus-visible,
         input:focus-visible {
-            outline: 3px solid rgba(8, 145, 178, 0.25);
+            outline: 3px solid rgba(49, 92, 253, 0.22);
             outline-offset: 2px;
+        }
+
+        .contribution-board {
+            direction: ltr;
+            overflow-x: auto;
+            padding-bottom: 0.2rem;
+        }
+
+        .contribution-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 13px;
+            grid-template-rows: repeat(7, 13px);
+            gap: 4px;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .contribution-cell {
+            width: 13px;
+            height: 13px;
+            border-radius: 3px;
+            border: 1px solid rgba(25, 23, 20, 0.08);
+            background: #ece8df;
+        }
+
+        .contribution-cell.level-1 {
+            background: #d9ff68;
+        }
+
+        .contribution-cell.level-2 {
+            background: #95d95a;
+        }
+
+        .contribution-cell.level-3 {
+            background: #147a50;
+        }
+
+        .contribution-cell.level-4 {
+            background: #24211d;
+        }
+
+        @media (min-width: 1024px) {
+            .app-shell {
+                display: block;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 1.5rem;
+            }
+
+            .side-rail {
+                display: grid !important;
+                grid-template-columns: minmax(240px, 1fr) minmax(190px, auto) minmax(220px, auto);
+                align-items: center;
+                position: static;
+                height: auto;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                padding: 1rem !important;
+            }
+
+            .side-rail > :nth-child(4),
+            .side-rail > :nth-child(5),
+            .side-rail > :nth-child(6) {
+                display: none;
+            }
+
+            .side-rail > .mt-auto {
+                display: none;
+            }
+
+            .workspace {
+                padding: 0 !important;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .app-shell {
+                padding: 0.75rem;
+            }
+
+            .side-rail {
+                border-radius: 8px;
+                margin-bottom: 0.75rem;
+                gap: 0.75rem !important;
+            }
+
+            .side-rail > :nth-child(4),
+            .side-rail > :nth-child(5),
+            .side-rail > :nth-child(6) {
+                display: none;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -119,306 +529,452 @@
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
     <div id="toast" class="fixed top-4 left-4 right-4 md:right-auto md:w-96 z-50 opacity-0 -translate-y-6 pointer-events-none transition-all duration-200">
         <div class="panel p-4 flex items-start gap-3">
             <div id="toast-icon" class="icon-box shrink-0"></div>
             <div>
                 <h4 id="toast-title" class="font-extrabold text-sm">إشعار</h4>
-                <p id="toast-desc" class="text-xs text-slate-600 mt-1 leading-relaxed">تفاصيل الرسالة تظهر هنا.</p>
+                <p id="toast-desc" class="text-xs text-stone-600 mt-1 leading-relaxed">تفاصيل الرسالة تظهر هنا.</p>
             </div>
         </div>
     </div>
 
-    <div id="ai-loading-overlay" class="fixed inset-0 z-50 hidden bg-white/92 backdrop-blur-md p-6">
+    <div id="ai-loading-overlay" class="fixed inset-0 z-50 hidden bg-[#fbfaf7]/95 backdrop-blur-sm p-6">
         <div class="h-full max-w-md mx-auto flex flex-col items-center justify-center text-center">
-            <div class="w-20 h-20 border border-cyan-200 bg-cyan-50 text-cyan-700 rounded-lg flex items-center justify-center">
+            <div class="w-20 h-20 border border-stone-300 bg-white text-stone-950 rounded-lg flex items-center justify-center">
                 <i data-lucide="scan-text" class="w-9 h-9"></i>
             </div>
             <h3 class="display text-2xl font-bold mt-6">جاري تحليل تقرير InBody</h3>
-            <p class="text-sm text-slate-600 mt-3 leading-7">
+            <p class="text-sm text-stone-600 mt-3 leading-7">
                 يتم إرسال الصورة إلى Supabase Edge Function ثم قراءة الأرقام بواسطة Gemini.
             </p>
             <div class="mt-6 w-full panel p-3 flex items-center gap-3">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="loading-status" class="text-sm font-bold text-slate-700">بدء الاتصال بالخادم الذكي...</span>
+                <span class="w-2.5 h-2.5 rounded-lg bg-lime-300 animate-pulse"></span>
+                <span id="loading-status" class="text-sm font-bold text-stone-700">بدء الاتصال بالخادم الذكي...</span>
             </div>
         </div>
     </div>
 
-    <header class="sticky top-0 z-40 bg-white/88 backdrop-blur-xl border-b border-cyan-100">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-lg bg-cyan-700 text-white flex items-center justify-center font-extrabold">م</div>
-                <div>
-                    <h1 class="text-base font-bold leading-tight">Private Coach</h1>
-                    <p class="text-xs text-slate-500">لوحة تدريب وتنشيف منظمة</p>
+    <input type="file" id="inbody-file-input" accept="image/*" class="hidden" onchange="processInbodyUpload(event)">
+
+    <section id="login-view" class="login-view">
+        <div class="login-photo" aria-hidden="true"></div>
+        <div class="login-layout">
+            <div class="login-copy">
+                <span class="login-badge">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    Private Coach Dashboard
+                </span>
+                <h1 class="login-title display">ادخل كرياضي، تابع كمدرب.</h1>
+                <p>
+                    سجّل دخولك لحفظ الحصص، قراءة تحليل Gemini، ومقارنة قياسات InBody مع تقدمك التدريبي.
+                </p>
+                <div class="login-stats">
+                    <div class="login-stat">
+                        <span>تتبع</span>
+                        <strong>حصص</strong>
+                    </div>
+                    <div class="login-stat">
+                        <span>مقارنة</span>
+                        <strong>InBody</strong>
+                    </div>
+                    <div class="login-stat">
+                        <span>تحليل</span>
+                        <strong>Gemini</strong>
+                    </div>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="h-9 px-3 rounded-lg border border-cyan-100 bg-cyan-50 text-cyan-800 flex items-center gap-2">
-                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
-                    <span id="current-day-label" class="text-xs font-bold">جاري التحميل...</span>
+
+            <aside class="login-card">
+                <div class="login-card-head">
+                    <div>
+                        <h2 class="display text-2xl font-bold">تسجيل الدخول</h2>
+                        <p class="mt-2 text-sm leading-7 text-stone-600">استخدم بريد Supabase للوصول إلى لوحة التدريب الخاصة بك.</p>
+                    </div>
+                    <span class="login-mark">
+                        <i data-lucide="dumbbell" class="w-5 h-5"></i>
+                    </span>
                 </div>
-                <button onclick="document.getElementById('inbody-file-input').click()" class="h-9 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-2" title="رفع تقرير InBody">
+                <div id="login-auth-panel"></div>
+            </aside>
+        </div>
+    </section>
+
+    <div id="dashboard-view" class="app-shell is-hidden">
+        <aside class="side-rail p-4 lg:p-6 flex flex-col gap-5">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg bg-white text-stone-950 flex items-center justify-center font-extrabold text-lg">م</div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">Private Coach</h1>
+                    <p class="text-xs text-white/55">Performance board</p>
+                </div>
+            </div>
+
+            <div class="rail-box p-4">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs text-white/55">اليوم الحالي</span>
+                    <i data-lucide="calendar-days" class="w-4 h-4 text-lime-200"></i>
+                </div>
+                <div id="current-day-label" class="mt-2 text-lg font-bold">جاري التحميل...</div>
+            </div>
+
+            <div class="grid gap-2">
+                <button onclick="scrollToAuthPanel()" class="ghost-button h-11 px-4 text-sm font-extrabold cursor-pointer flex items-center justify-center gap-2" title="تسجيل الدخول إلى Supabase">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    حسابي
+                </button>
+                <button onclick="document.getElementById('inbody-file-input').click()" class="lime-button h-11 px-4 text-sm font-extrabold cursor-pointer flex items-center justify-center gap-2" title="رفع تقرير InBody">
                     <i data-lucide="upload-cloud" class="w-4 h-4"></i>
-                    تحديث InBody
+                    تحديث تقرير InBody
                 </button>
             </div>
-        </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
-        <input type="file" id="inbody-file-input" accept="image/*" class="hidden" onchange="processInbodyUpload(event)">
-
-        <section class="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-5 items-stretch">
-            <div class="panel p-5 md:p-6">
-                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-                    <div class="max-w-2xl">
-                        <span class="inline-flex items-center gap-2 h-8 px-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-extrabold">
-                            <i data-lucide="activity" class="w-4 h-4"></i>
-                            تقدم مستقر
-                        </span>
-                        <h2 class="display text-3xl md:text-5xl font-bold mt-4 leading-tight">
-                            رحلة تنشيف واضحة بأرقام يومية قابلة للمتابعة.
-                        </h2>
-                        <p class="text-sm md:text-base text-slate-600 mt-4 leading-8">
-                            من وزن البداية <strong class="text-rose-700">85.34 كجم</strong> إلى الوزن الحالي
-                            <strong id="current-weight-desc" class="text-emerald-700">79.44 كجم</strong>، مع متابعة العمر الحيوي والدهون الحشوية وخطة التمرين.
-                        </p>
-                    </div>
-
-                    <div class="w-full md:w-64 metric p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">إجمالي النزول</span>
-                            <i data-lucide="trending-down" class="w-5 h-5 text-emerald-600"></i>
-                        </div>
-                        <div id="weight-loss-display" class="display text-4xl font-bold text-emerald-700 mt-3">5.90 كجم</div>
-                        <div class="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
-                            <div id="loss-progress-bar" class="h-full bg-emerald-600 rounded-full" style="width: 62%"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-3">الهدف التالي: ثبات الأداء مع نزول تدريجي.</p>
-                    </div>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="metric p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">الوزن الحالي</span>
-                            <i data-lucide="scale" class="w-4 h-4 text-cyan-700"></i>
-                        </div>
-                        <div class="mt-3 text-2xl font-extrabold"><span id="weight-stat-display">79.44</span> <span class="text-sm text-slate-500">كجم</span></div>
-                    </div>
-                    <div class="metric p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">الوزن الأولي</span>
-                            <i data-lucide="flag" class="w-4 h-4 text-amber-700"></i>
-                        </div>
-                        <div class="mt-3 text-2xl font-extrabold">85.34 <span class="text-sm text-slate-500">كجم</span></div>
-                    </div>
-                    <div class="metric p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">العمر الحيوي</span>
-                            <i data-lucide="heart-pulse" class="w-4 h-4 text-rose-700"></i>
-                        </div>
-                        <div class="mt-3 text-2xl font-extrabold"><span id="body-age-display">37</span> <span class="text-sm text-slate-500">سنة</span></div>
-                    </div>
-                    <div class="metric p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500">الدهون الحشوية</span>
-                            <i data-lucide="gauge" class="w-4 h-4 text-cyan-700"></i>
-                        </div>
-                        <div class="mt-3 text-2xl font-extrabold"><span id="visceral-fat-display">11.5</span> <span class="text-sm text-slate-500">مستوى</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <aside class="panel p-5 md:p-6">
-                <div class="flex items-center justify-between gap-3">
+            <div class="rail-box p-4">
+                <div class="flex items-start justify-between gap-3">
                     <div>
-                        <h3 class="display text-2xl font-bold">ملخص اليوم</h3>
-                        <p id="active-day-subtitle-mini" class="text-sm text-slate-500 mt-1">تفاصيل التمرين الحالي</p>
+                        <span class="text-xs text-white/55">تمرين اليوم</span>
+                        <p id="active-day-subtitle-mini" class="text-sm font-semibold mt-1 leading-6">تفاصيل التمرين الحالي</p>
                     </div>
-                    <div id="workout-icon-bg" class="icon-box">
+                    <div id="workout-icon-bg" class="w-10 h-10 rounded-lg border border-white/15 flex items-center justify-center text-lime-200">
                         <i data-lucide="dumbbell" class="w-5 h-5"></i>
                     </div>
                 </div>
-
-                <div class="mt-5 border-t border-slate-100 pt-5 space-y-4">
-                    <div>
-                        <span class="text-xs font-bold text-slate-500">التقدم بالتمرين</span>
-                        <div class="mt-2 flex items-center gap-3">
-                            <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                                <div id="exercise-progress-bar" class="h-full rounded-full bg-cyan-700" style="width: 0%"></div>
-                            </div>
-                            <span id="exercise-progress-percent" class="text-xs font-extrabold text-cyan-800">0%</span>
-                        </div>
-                        <p id="exercise-progress" class="text-xs text-slate-500 mt-2">0 من 7 تمارين مكتملة</p>
+                <div class="mt-5">
+                    <div class="flex items-center justify-between text-xs text-white/60">
+                        <span>إنجاز التمرين</span>
+                        <span id="exercise-progress-percent" class="font-bold text-white">0%</span>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="border border-slate-200 rounded-lg p-3">
-                            <span class="text-xs text-slate-500">البروتين</span>
-                            <div id="protein-result" class="text-lg font-extrabold mt-1 text-emerald-700">127 - 159 جرام</div>
-                        </div>
-                        <div class="border border-slate-200 rounded-lg p-3">
-                            <span class="text-xs text-slate-500">المياه</span>
-                            <div id="water-result" class="text-lg font-extrabold mt-1 text-cyan-700">3.2 لتر</div>
-                        </div>
+                    <div class="rail-progress mt-2">
+                        <div id="exercise-progress-bar" style="width: 0%"></div>
                     </div>
+                    <p id="exercise-progress" class="text-xs text-white/55 mt-2">0 من 7 تمارين مكتملة</p>
                 </div>
+            </div>
 
-                <button onclick="document.getElementById('inbody-file-input').click()" class="mt-5 w-full h-11 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-extrabold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2" title="تحليل صورة InBody">
-                    <i data-lucide="scan-line" class="w-4 h-4"></i>
-                    تحليل صورة InBody
-                </button>
-            </aside>
-        </section>
-
-        <section class="panel p-5 md:p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="rail-box p-4 grid grid-cols-2 gap-3">
                 <div>
-                    <h3 class="display text-2xl font-bold">تقسيم الأسبوع</h3>
-                    <p class="text-sm text-slate-500 mt-1">اختر يوم التمرين لعرض التمارين والمجموعات.</p>
+                    <span class="text-xs text-white/50">بروتين</span>
+                    <div id="protein-result" class="mt-1 text-sm font-bold text-lime-100">127 - 159 جرام</div>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <i data-lucide="moon" class="w-4 h-4"></i>
-                    الراحة: الثلاثاء، الجمعة، السبت
+                <div>
+                    <span class="text-xs text-white/50">مياه</span>
+                    <div id="water-result" class="mt-1 text-sm font-bold text-lime-100">3.2 لتر</div>
                 </div>
             </div>
 
-            <div id="weekly-days-container" class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <button id="day-sun" onclick="selectDay('sun')" class="day-button cursor-pointer text-right border border-slate-200 rounded-lg p-4 bg-white hover:border-cyan-300 hover:bg-cyan-50 transition-colors">
-                    <span class="text-xs font-bold text-slate-500">الأحد</span>
-                    <span class="mt-3 flex items-center justify-between gap-2">
-                        <strong class="text-base">جزء علوي</strong>
-                        <i data-lucide="dumbbell" class="w-4 h-4 text-cyan-700"></i>
-                    </span>
-                    <span class="text-xs text-slate-500 mt-1 block">Upper Body</span>
-                </button>
-                <button id="day-mon" onclick="selectDay('mon')" class="day-button cursor-pointer text-right border border-slate-200 rounded-lg p-4 bg-white hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
-                    <span class="text-xs font-bold text-slate-500">الاثنين</span>
-                    <span class="mt-3 flex items-center justify-between gap-2">
-                        <strong class="text-base">رجل وبطن</strong>
-                        <i data-lucide="footprints" class="w-4 h-4 text-emerald-700"></i>
-                    </span>
-                    <span class="text-xs text-slate-500 mt-1 block">Lower & Abs</span>
-                </button>
-                <button id="day-wed" onclick="selectDay('wed')" class="day-button cursor-pointer text-right border border-slate-200 rounded-lg p-4 bg-white hover:border-cyan-300 hover:bg-cyan-50 transition-colors">
-                    <span class="text-xs font-bold text-slate-500">الأربعاء</span>
-                    <span class="mt-3 flex items-center justify-between gap-2">
-                        <strong class="text-base">جزء علوي</strong>
-                        <i data-lucide="dumbbell" class="w-4 h-4 text-cyan-700"></i>
-                    </span>
-                    <span class="text-xs text-slate-500 mt-1 block">Upper Body</span>
-                </button>
-                <button id="day-thu" onclick="selectDay('thu')" class="day-button cursor-pointer text-right border border-slate-200 rounded-lg p-4 bg-white hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
-                    <span class="text-xs font-bold text-slate-500">الخميس</span>
-                    <span class="mt-3 flex items-center justify-between gap-2">
-                        <strong class="text-base">رجل وبطن</strong>
-                        <i data-lucide="footprints" class="w-4 h-4 text-emerald-700"></i>
-                    </span>
-                    <span class="text-xs text-slate-500 mt-1 block">Lower & Abs</span>
-                </button>
+            <div class="mt-auto pt-3 text-xs leading-6 text-white/45">
+                آخر تحديث تلقائي يظهر بعد رفع تقرير InBody القادم.
             </div>
-        </section>
+        </aside>
 
-        <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
-            <div class="panel overflow-hidden">
-                <div class="p-5 md:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <main class="workspace px-4 py-5 md:px-8 md:py-8 lg:px-10 space-y-6">
+            <header class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 items-stretch">
+                <section class="panel p-5 md:p-7">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <span class="inline-flex items-center gap-2 h-8 px-3 rounded-lg border border-stone-300 bg-white text-xs font-bold text-stone-700">
+                            <i data-lucide="activity" class="w-4 h-4"></i>
+                            متابعة تنشيف
+                        </span>
+                        <span class="text-xs font-semibold text-stone-500">تحديثات InBody + جدول مقاومة</span>
+                    </div>
+                    <div class="mt-5 grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 items-end">
+                        <div>
+                            <h2 class="display text-3xl md:text-4xl font-bold leading-tight max-w-3xl">
+                                ملخص اليوم التدريبي
+                            </h2>
+                            <p class="mt-5 max-w-2xl text-sm md:text-base leading-8 text-stone-600">
+                                انطلقت من <strong class="text-rose-700">85.34 كجم</strong> ووصلت إلى
+                                <strong id="current-weight-desc" class="text-stone-950">79.44 كجم</strong>. الصفحة الآن مرتبة حول أهم قرارين: تمرين اليوم، ومؤشرات الجسم.
+                            </p>
+                        </div>
+                        <div class="border-t lg:border-t-0 lg:border-r border-stone-200 pt-5 lg:pt-0 lg:pr-6">
+                            <span class="text-xs font-bold text-stone-500">إجمالي النزول</span>
+                            <div id="weight-loss-display" class="display text-4xl font-bold mt-2 text-stone-950">5.90 كجم</div>
+                            <div class="progress-track mt-5">
+                                <div id="loss-progress-bar" class="progress-fill" style="width: 62%"></div>
+                            </div>
+                            <p class="mt-3 text-xs leading-6 text-stone-500">مؤشر قريب للهدف المرحلي مع الحفاظ على الأداء.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="panel p-5 md:p-6 flex flex-col justify-between">
                     <div>
+                        <span class="text-xs font-bold text-stone-500">الوزن الحالي</span>
+                        <div class="mt-3 flex items-end gap-2">
+                            <strong id="weight-stat-display" class="metric-value text-5xl leading-none">79.44</strong>
+                            <span class="mb-2 text-sm font-bold text-stone-500">كجم</span>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('inbody-file-input').click()" class="ink-button mt-6 h-11 px-4 text-sm font-extrabold cursor-pointer flex items-center justify-center gap-2" title="تحليل صورة InBody">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        تحليل صورة InBody
+                    </button>
+                </aside>
+            </header>
+
+            <section class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                <div class="metric p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-500">الوزن الأولي</span>
+                        <i data-lucide="flag" class="w-4 h-4 text-amber-700"></i>
+                    </div>
+                    <div class="mt-4 text-2xl font-extrabold">85.34 <span class="text-sm text-stone-500">كجم</span></div>
+                </div>
+                <div class="metric p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-500">العمر الحيوي</span>
+                        <i data-lucide="heart-pulse" class="w-4 h-4 text-rose-700"></i>
+                    </div>
+                    <div class="mt-4 text-2xl font-extrabold"><span id="body-age-display">37</span> <span class="text-sm text-stone-500">سنة</span></div>
+                </div>
+                <div class="metric p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-500">الدهون الحشوية</span>
+                        <i data-lucide="gauge" class="w-4 h-4 text-blue-700"></i>
+                    </div>
+                    <div class="mt-4 text-2xl font-extrabold"><span id="visceral-fat-display">11.5</span> <span class="text-sm text-stone-500">مستوى</span></div>
+                </div>
+                <div class="metric p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-500">ثبات الخطة</span>
+                        <i data-lucide="check-check" class="w-4 h-4 text-green-700"></i>
+                    </div>
+                    <div class="mt-4 text-2xl font-extrabold">4 <span class="text-sm text-stone-500">أيام تمرين</span></div>
+                </div>
+            </section>
+
+            <section class="panel p-5 md:p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h3 class="display text-2xl font-bold">تقسيم الأسبوع</h3>
+                        <p class="text-sm text-stone-500 mt-1">اختر اليوم، ثم نفذ المجموعات من اليمين لليسار بدون تشتيت.</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-stone-500">
+                        <i data-lucide="moon" class="w-4 h-4"></i>
+                        الراحة: الثلاثاء، الجمعة، السبت
+                    </div>
+                </div>
+
+                <div id="weekly-days-container" class="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <button id="day-sun" onclick="selectDay('sun')" class="day-button cursor-pointer text-right p-4">
+                        <span class="day-muted text-xs font-bold text-stone-500">الأحد</span>
+                        <span class="mt-3 flex items-center justify-between gap-2">
+                            <strong class="text-base">جزء علوي</strong>
+                            <i data-lucide="dumbbell" class="day-icon w-4 h-4 text-stone-800"></i>
+                        </span>
+                        <span class="day-muted text-xs text-stone-500 mt-1 block">Upper Body</span>
+                    </button>
+                    <button id="day-mon" onclick="selectDay('mon')" class="day-button cursor-pointer text-right p-4">
+                        <span class="day-muted text-xs font-bold text-stone-500">الاثنين</span>
+                        <span class="mt-3 flex items-center justify-between gap-2">
+                            <strong class="text-base">رجل وبطن</strong>
+                            <i data-lucide="footprints" class="day-icon w-4 h-4 text-stone-800"></i>
+                        </span>
+                        <span class="day-muted text-xs text-stone-500 mt-1 block">Lower & Abs</span>
+                    </button>
+                    <button id="day-wed" onclick="selectDay('wed')" class="day-button cursor-pointer text-right p-4">
+                        <span class="day-muted text-xs font-bold text-stone-500">الأربعاء</span>
+                        <span class="mt-3 flex items-center justify-between gap-2">
+                            <strong class="text-base">جزء علوي</strong>
+                            <i data-lucide="dumbbell" class="day-icon w-4 h-4 text-stone-800"></i>
+                        </span>
+                        <span class="day-muted text-xs text-stone-500 mt-1 block">Upper Body</span>
+                    </button>
+                    <button id="day-thu" onclick="selectDay('thu')" class="day-button cursor-pointer text-right p-4">
+                        <span class="day-muted text-xs font-bold text-stone-500">الخميس</span>
+                        <span class="mt-3 flex items-center justify-between gap-2">
+                            <strong class="text-base">رجل وبطن</strong>
+                            <i data-lucide="footprints" class="day-icon w-4 h-4 text-stone-800"></i>
+                        </span>
+                        <span class="day-muted text-xs text-stone-500 mt-1 block">Lower & Abs</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
+                <div class="panel p-5 md:p-6">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div>
+                            <h3 class="display text-2xl font-bold flex items-center gap-2">
+                                <i data-lucide="calendar-check" class="w-5 h-5 text-green-700"></i>
+                                سجل الالتزام
+                            </h3>
+                            <p class="text-sm text-stone-500 mt-1">خريطة آخر أسابيع التدريب حسب الأيام التي تم حفظها.</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 min-w-full lg:min-w-72">
+                            <div class="rounded-lg border border-stone-200 bg-[#fbfaf7] p-3">
+                                <span class="text-[11px] font-bold text-stone-500">أيام تدريب</span>
+                                <strong id="history-days-count" class="mt-1 block text-xl">0</strong>
+                            </div>
+                            <div class="rounded-lg border border-stone-200 bg-[#fbfaf7] p-3">
+                                <span class="text-[11px] font-bold text-stone-500">مجموعات</span>
+                                <strong id="history-sets-count" class="mt-1 block text-xl">0</strong>
+                            </div>
+                            <div class="rounded-lg border border-stone-200 bg-[#fbfaf7] p-3">
+                                <span class="text-[11px] font-bold text-stone-500">تتابع</span>
+                                <strong id="history-streak-count" class="mt-1 block text-xl">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="history-auth-panel" class="mt-5 rounded-lg border border-stone-200 bg-[#fbfaf7] p-4"></div>
+
+                    <div class="mt-5 contribution-board">
+                        <div id="training-contribution-graph" class="contribution-grid"></div>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500">
+                        <span id="history-range-label">آخر 16 أسبوع</span>
+                        <div class="flex items-center gap-2">
+                            <span>أقل</span>
+                            <span class="contribution-cell"></span>
+                            <span class="contribution-cell level-1"></span>
+                            <span class="contribution-cell level-2"></span>
+                            <span class="contribution-cell level-3"></span>
+                            <span class="contribution-cell level-4"></span>
+                            <span>أكثر</span>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="panel p-5 md:p-6">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="display text-2xl font-bold flex items-center gap-2">
+                                <i data-lucide="line-chart" class="w-5 h-5 text-blue-700"></i>
+                                سجل InBody
+                            </h3>
+                            <p class="text-sm text-stone-500 mt-1">آخر القياسات المحفوظة والفروق بينها.</p>
+                        </div>
+                        <button onclick="document.getElementById('inbody-file-input').click()" class="ghost-button h-10 w-10 flex items-center justify-center cursor-pointer" title="إضافة قياس">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="inbody-latest-summary" class="mt-5 rounded-lg border border-stone-200 bg-[#fbfaf7] p-4 text-sm text-stone-600">
+                        لا توجد قياسات محفوظة بعد.
+                    </div>
+                    <div id="inbody-history-list" class="mt-4 space-y-3"></div>
+                </aside>
+            </section>
+
+            <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
+                <div class="panel overflow-hidden">
+                    <div class="p-5 md:p-6 border-b border-stone-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div class="flex items-center gap-3">
                             <div class="icon-box">
                                 <i id="active-day-icon" data-lucide="dumbbell" class="w-5 h-5"></i>
                             </div>
                             <div>
                                 <h3 id="active-day-title" class="display text-2xl font-bold">تمرين اليوم</h3>
-                                <p id="active-day-subtitle" class="text-sm text-slate-500 mt-1">تفاصيل التمارين والمجموعات</p>
+                                <p id="active-day-subtitle" class="text-sm text-stone-500 mt-1">تفاصيل التمارين والمجموعات</p>
                             </div>
                         </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="analyze-session-button" onclick="analyzeSession()" class="ink-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center gap-2" title="تحليل الحصة بالذكاء الاصطناعي">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                تحليل الحصة
+                            </button>
+                            <button id="save-session-button" onclick="saveCurrentSession()" class="lime-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center gap-2" title="حفظ الحصة في Supabase">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                حفظ الحصة
+                            </button>
+                            <button onclick="resetChecks()" class="ghost-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center gap-2" title="إعادة تهيئة المجموعات">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                إعادة التمرين
+                            </button>
+                        </div>
                     </div>
-                    <button onclick="resetChecks()" class="h-10 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-2" title="إعادة تهيئة المجموعات">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        إعادة التمرين
-                    </button>
+                    <div id="exercise-list" class="divide-y divide-stone-200"></div>
                 </div>
-                <div id="exercise-list" class="divide-y divide-slate-100"></div>
-            </div>
 
-            <aside class="space-y-5">
-                <section class="panel p-5">
-                    <h3 class="display text-xl font-bold flex items-center gap-2">
-                        <i data-lucide="calculator" class="w-5 h-5 text-emerald-700"></i>
-                        حاسبة التغذية
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-2 leading-6">تتغير الحسبة تلقائيا حسب الوزن الحالي.</p>
+                <aside class="space-y-5">
+                    <section class="panel p-5">
+                        <h3 class="display text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-blue-700"></i>
+                            تحليل الحصة
+                        </h3>
+                        <p class="text-xs text-stone-500 mt-2 leading-6">يرسل عدد المجموعات المنتهية فقط إلى Gemini عبر Supabase.</p>
+                        <div id="session-analysis-output" class="mt-4 rounded-lg border border-stone-200 bg-[#fbfaf7] p-4 text-sm leading-7 text-stone-600">
+                            اضغط "تحليل الحصة" بعد تسجيل مجموعاتك لعرض ملاحظات مختصرة على الأداء.
+                        </div>
+                    </section>
 
-                    <label for="user-calc-weight" class="block text-xs font-bold text-slate-600 mt-5 mb-2">الوزن الحالي بالكيلوجرام</label>
-                    <input type="number" id="user-calc-weight" value="79.44" oninput="recalculateMacros()" class="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold">
+                    <section class="panel p-5">
+                        <h3 class="display text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="calculator" class="w-5 h-5 text-green-700"></i>
+                            حاسبة التغذية
+                        </h3>
+                        <p class="text-xs text-stone-500 mt-2 leading-6">تتغير الحسبة تلقائيا حسب الوزن الحالي.</p>
 
-                    <div class="mt-5 space-y-3 text-sm">
-                        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                            <span class="text-slate-600">بروتين يومي</span>
-                            <strong id="protein-result-side" class="text-emerald-700">127 - 159 جرام</strong>
-                        </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-600">مياه يومية</span>
-                            <strong id="water-result-side" class="text-cyan-700">3.2 لتر</strong>
-                        </div>
-                    </div>
-                </section>
+                        <label for="user-calc-weight" class="block text-xs font-bold text-stone-600 mt-5 mb-2">الوزن الحالي بالكيلوجرام</label>
+                        <input type="number" id="user-calc-weight" value="79.44" oninput="recalculateMacros()" class="w-full h-11 rounded-lg border border-stone-300 bg-white px-3 text-sm font-bold">
 
-                <section class="panel p-5">
-                    <h3 class="display text-xl font-bold flex items-center gap-2">
-                        <i data-lucide="utensils" class="w-5 h-5 text-amber-700"></i>
-                        مصادر البروتين
-                    </h3>
-                    <div class="mt-4 space-y-3 text-sm">
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-600">صدور دجاج مطهية 200 جم</span>
-                            <strong>60 جم</strong>
+                        <div class="mt-5 space-y-3 text-sm">
+                            <div class="flex items-center justify-between gap-3 border-b border-stone-200 pb-3">
+                                <span class="text-stone-600">بروتين يومي</span>
+                                <strong id="protein-result-side" class="text-green-700">127 - 159 جرام</strong>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-stone-600">مياه يومية</span>
+                                <strong id="water-result-side" class="text-blue-700">3.2 لتر</strong>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-600">علبة تونة مصفاة</span>
-                            <strong>30 جم</strong>
-                        </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-600">3 بيضات مسلوقة</span>
-                            <strong>18 جم</strong>
-                        </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-600">جبنة قريش 150 جم</span>
-                            <strong>18 جم</strong>
-                        </div>
-                    </div>
-                </section>
-            </aside>
-        </section>
-    </main>
+                    </section>
 
-    <div id="rest-timer-bar" class="fixed bottom-0 left-0 right-0 translate-y-full transition-transform duration-200 z-40 bg-white/92 backdrop-blur-xl border-t border-cyan-100">
+                    <section class="panel p-5">
+                        <h3 class="display text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="utensils" class="w-5 h-5 text-amber-700"></i>
+                            مصادر البروتين
+                        </h3>
+                        <div class="mt-4 space-y-3 text-sm">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-stone-600">صدور دجاج مطهية 200 جم</span>
+                                <strong>60 جم</strong>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-stone-600">علبة تونة مصفاة</span>
+                                <strong>30 جم</strong>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-stone-600">3 بيضات مسلوقة</span>
+                                <strong>18 جم</strong>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-stone-600">جبنة قريش 150 جم</span>
+                                <strong>18 جم</strong>
+                            </div>
+                        </div>
+                    </section>
+                </aside>
+            </section>
+
+            <footer class="py-3 text-center text-xs text-stone-500">
+                <p>Private Coach Dashboard</p>
+            </footer>
+        </main>
+    </div>
+
+    <div id="rest-timer-bar" class="fixed bottom-0 left-0 right-0 translate-y-full transition-transform duration-200 z-40 bg-[#24211d] text-white border-t border-black/20">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="icon-box">
+                <div class="w-10 h-10 rounded-lg border border-white/15 flex items-center justify-center text-lime-200">
                     <i data-lucide="timer" class="w-5 h-5"></i>
                 </div>
                 <div>
                     <h4 class="text-sm font-extrabold">وقت الراحة</h4>
-                    <p class="text-xs text-slate-500">استعد للمجموعة التالية</p>
+                    <p class="text-xs text-white/55">استعد للمجموعة التالية</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <span id="timer-display" class="min-w-20 text-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-lg font-bold text-cyan-800">01:30</span>
-                <button onclick="skipTimer()" class="h-10 px-3 rounded-lg border border-slate-200 text-xs font-bold hover:bg-slate-50 cursor-pointer" title="تخطي المؤقت">تخطي</button>
+                <span id="timer-display" class="min-w-20 text-center rounded-lg border border-white/15 bg-white/8 px-3 py-2 font-mono text-lg font-bold text-lime-100">01:30</span>
+                <button onclick="skipTimer()" class="h-10 px-3 rounded-lg border border-white/15 text-xs font-bold hover:bg-white/10 cursor-pointer" title="تخطي المؤقت">تخطي</button>
             </div>
         </div>
     </div>
 
-    <footer class="border-t border-cyan-100 mt-10 py-6 text-center text-xs text-slate-500">
-        <p>Private Coach Dashboard</p>
-    </footer>
-
-    <script src="./config.js"></script>
+    <script src="./config.js?v=20260608-supabase-auth"></script>
     <script>
         let currentWeight = 79.44;
         const initialWeight = 85.34;
@@ -429,6 +985,16 @@
         let timerInterval = null;
         let timerSecondsLeft = 0;
         const appConfig = window.TRAINING_DASHBOARD_CONFIG || {};
+        let supabaseClient = null;
+        let activeUser = null;
+        let trainingHistory = [];
+        let inbodyHistory = [];
+        let latestSessionAnalysis = null;
+        let authListenerReady = false;
+        let authMode = "magic";
+        let exerciseVideos = {};
+        let activeVideoEditorKey = null;
+        const EXERCISE_VIDEO_STORAGE_KEY = "private_coach_exercise_videos_v1";
 
         const workoutData = {
             sun: {
@@ -464,11 +1030,16 @@
         workoutData.wed = { ...workoutData.sun, title: "تمرين الجزء العلوي - جولة الأربعاء", exercises: workoutData.sun.exercises.map((ex, index) => ({ ...ex, id: `w${index + 1}` })) };
         workoutData.thu = { ...workoutData.mon, title: "تمرين الجزء السفلي والبطن - جولة الخميس", exercises: workoutData.mon.exercises.map((ex, index) => ({ ...ex, id: `t${index + 1}` })) };
 
-        window.onload = function() {
+        window.onload = async function() {
             lucide.createIcons();
             clearLegacyApiKeySettings();
+            loadLocalExerciseVideos();
+            renderLoginAuthPanel();
             detectAndSetCurrentDay();
             renderDashboard();
+            renderContributionGraph();
+            renderInbodyHistory();
+            await initializeSupabaseHistory();
         };
 
         function clearLegacyApiKeySettings() {
@@ -499,11 +1070,8 @@
             daysList.forEach(key => {
                 const element = document.getElementById(`day-${key}`);
                 const isActive = key === dayKey;
-                element.classList.toggle("border-cyan-500", isActive && workoutData[key].type === "upper");
-                element.classList.toggle("bg-cyan-50", isActive && workoutData[key].type === "upper");
-                element.classList.toggle("border-emerald-500", isActive && workoutData[key].type === "lower");
-                element.classList.toggle("bg-emerald-50", isActive && workoutData[key].type === "lower");
-                element.classList.toggle("shadow-sm", isActive);
+                element.classList.toggle("is-active-upper", isActive && workoutData[key].type === "upper");
+                element.classList.toggle("is-active-lower", isActive && workoutData[key].type === "lower");
             });
 
             const dayData = workoutData[dayKey];
@@ -526,34 +1094,89 @@
 
             dayData.exercises.forEach((ex, exIndex) => {
                 const checkedState = checkedSets[ex.id] || [];
+                const videoKey = getExerciseVideoKey(ex);
+                const video = getExerciseVideo(ex);
+                const isEditingVideo = activeVideoEditorKey === videoKey;
+                const videoInputId = getExerciseVideoInputId(videoKey);
                 let setButtons = "";
                 for (let s = 1; s <= ex.sets; s++) {
                     const isChecked = checkedState[s - 1];
-                    const styles = isChecked
-                        ? "bg-cyan-700 text-white border-cyan-700"
-                        : "bg-white text-slate-600 hover:border-cyan-400 hover:text-cyan-800";
+                    const styles = isChecked ? "is-checked" : "";
                     setButtons += `<button onclick="toggleSet('${ex.id}', ${s - 1}, ${ex.rest})" class="set-button ${styles} cursor-pointer" title="المجموعة ${s}">${s}</button>`;
                 }
 
+                const videoPanel = `
+                    <div class="exercise-video mt-4">
+                        <div class="exercise-video-head">
+                            <span class="inline-flex items-center gap-2 text-xs font-extrabold text-stone-700">
+                                <i data-lucide="youtube" class="w-4 h-4 text-rose-700"></i>
+                                فيديو الحركة
+                            </span>
+                            ${video && !isEditingVideo ? `
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openExerciseVideoEditor('${ex.id}')" class="ghost-button h-8 w-8 flex items-center justify-center cursor-pointer" title="تغيير رابط الفيديو">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="deleteExerciseVideo('${ex.id}')" class="ghost-button h-8 w-8 flex items-center justify-center cursor-pointer" title="حذف رابط الفيديو">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            ` : ""}
+                        </div>
+
+                        ${video && !isEditingVideo ? `
+                            <div class="exercise-video-frame">
+                                <iframe
+                                    title="فيديو ${escapeHtml(ex.name)}"
+                                    src="${getYouTubeEmbedUrl(video.videoId)}"
+                                    loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        ` : isEditingVideo ? `
+                            <div class="mt-3 grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-2">
+                                <input id="${videoInputId}" type="url" value="${escapeHtml(video?.url || "")}" onkeydown="handleVideoInputKeydown(event, '${ex.id}')" class="h-10 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm font-bold" placeholder="https://youtube.com/shorts/...">
+                                <button onclick="saveExerciseVideo('${ex.id}')" class="ink-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    حفظ
+                                </button>
+                                <button onclick="cancelExerciseVideoEdit()" class="ghost-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    إلغاء
+                                </button>
+                            </div>
+                            <p class="mt-2 text-[11px] leading-5 text-stone-500">يدعم روابط YouTube و Shorts و youtu.be، وسيتم تشغيل الفيديو داخل الصفحة.</p>
+                        ` : `
+                            <button onclick="openExerciseVideoEditor('${ex.id}')" class="mt-3 ghost-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                إضافة رابط YouTube / Short
+                            </button>
+                        `}
+                    </div>
+                `;
+
                 listContainer.innerHTML += `
-                    <article class="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
+                    <article class="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-[1fr_230px] gap-4">
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="h-7 min-w-8 px-2 rounded-lg bg-slate-100 text-slate-600 text-xs font-extrabold flex items-center justify-center">#${exIndex + 1}</span>
+                                <span class="h-7 min-w-8 px-2 rounded-lg bg-[#fbfaf7] border border-stone-200 text-stone-600 text-xs font-extrabold flex items-center justify-center">#${exIndex + 1}</span>
                                 <h4 class="text-lg font-extrabold">${ex.name}</h4>
-                                <span class="h-7 px-2 rounded-lg border border-slate-200 text-xs font-bold text-slate-600">${ex.target}</span>
+                                <span class="h-7 px-2 rounded-lg border border-stone-200 text-xs font-bold text-stone-600">${ex.target}</span>
                             </div>
-                            <p class="text-sm text-slate-600 leading-7 mt-3">${ex.desc}</p>
-                            <div class="mt-4 flex flex-wrap gap-2 text-xs font-bold text-slate-500">
+                            <p class="text-sm text-stone-600 leading-7 mt-3">${ex.desc}</p>
+                            <div class="mt-4 flex flex-wrap gap-2 text-xs font-bold text-stone-500">
                                 <span class="inline-flex items-center gap-1"><i data-lucide="layers-3" class="w-4 h-4"></i>${ex.sets} مجموعات</span>
                                 <span class="inline-flex items-center gap-1"><i data-lucide="repeat-2" class="w-4 h-4"></i>${ex.reps}</span>
                                 <span class="inline-flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i>${ex.note}</span>
                             </div>
+                            ${videoPanel}
                         </div>
-                        <div class="border border-slate-200 rounded-lg p-3 flex flex-col justify-center gap-3">
-                            <span class="text-xs font-extrabold text-slate-500">المجموعات المنتهية</span>
+                        <div class="border border-stone-200 rounded-lg p-3 flex flex-col justify-center gap-3 bg-[#fbfaf7]">
+                            <span class="text-xs font-extrabold text-stone-500">المجموعات المنتهية</span>
                             <div class="flex flex-wrap gap-2">${setButtons}</div>
-                            <span class="text-xs text-slate-500">راحة ${ex.rest} ثانية</span>
+                            <span class="text-xs text-stone-500">راحة ${ex.rest} ثانية</span>
                         </div>
                     </article>
                 `;
@@ -572,6 +1195,7 @@
 
             if (!prevState) startRestTimer(restTime);
 
+            latestSessionAnalysis = null;
             renderExercises(workoutData[activeDayKey]);
             updateProgress();
         }
@@ -582,6 +1206,256 @@
                 if (found) return found;
             }
             return null;
+        }
+
+        function getExerciseVideoKey(exercise) {
+            const rawKey = exercise?.videoKey || exercise?.name || exercise?.id || "";
+            const slug = String(rawKey)
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+                .slice(0, 80);
+            return slug || String(exercise?.id || "exercise").slice(0, 80);
+        }
+
+        function getExerciseVideoInputId(videoKey) {
+            return `exercise-video-input-${videoKey}`;
+        }
+
+        function getExerciseVideo(exercise) {
+            return exerciseVideos[getExerciseVideoKey(exercise)] || null;
+        }
+
+        function getYouTubeEmbedUrl(videoId) {
+            return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0&modestbranding=1&playsinline=1`;
+        }
+
+        function parseYouTubeUrl(rawValue) {
+            const input = String(rawValue || "").trim();
+            if (!input) throw new Error("Missing YouTube URL.");
+
+            let urlText = input;
+            if (/^(youtube\.com|www\.youtube\.com|m\.youtube\.com|youtu\.be)\//i.test(urlText)) {
+                urlText = `https://${urlText}`;
+            }
+
+            let url;
+            try {
+                url = new URL(urlText);
+            } catch (_error) {
+                throw new Error("Invalid YouTube URL.");
+            }
+
+            const hostname = url.hostname.replace(/^www\./, "").replace(/^m\./, "");
+            const pathParts = url.pathname.split("/").filter(Boolean);
+            let videoId = "";
+
+            if (hostname === "youtu.be") {
+                videoId = pathParts[0] || "";
+            } else if (hostname === "youtube.com" || hostname.endsWith(".youtube.com")) {
+                if (pathParts[0] === "watch" || url.pathname === "/watch") {
+                    videoId = url.searchParams.get("v") || "";
+                } else if (["shorts", "embed", "live"].includes(pathParts[0])) {
+                    videoId = pathParts[1] || "";
+                }
+            }
+
+            if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+                throw new Error("Unsupported YouTube URL.");
+            }
+
+            return {
+                videoId,
+                url: `https://www.youtube.com/watch?v=${videoId}`
+            };
+        }
+
+        function normalizeExerciseVideoRecord(key, value) {
+            if (!key || !value) return null;
+
+            const url = value.url || value.youtube_url || "";
+            const fallbackUrl = value.videoId || value.youtube_video_id
+                ? `https://www.youtube.com/watch?v=${value.videoId || value.youtube_video_id}`
+                : url;
+
+            try {
+                const parsed = parseYouTubeUrl(fallbackUrl);
+                return {
+                    exerciseKey: String(key).slice(0, 80),
+                    url: parsed.url,
+                    videoId: parsed.videoId,
+                    updatedAt: value.updatedAt || value.updated_at || new Date().toISOString()
+                };
+            } catch (_error) {
+                return null;
+            }
+        }
+
+        function loadLocalExerciseVideos() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(getExerciseVideoStorageKey()) || "{}");
+                const nextVideos = {};
+                Object.entries(parsed).forEach(([key, value]) => {
+                    const record = normalizeExerciseVideoRecord(key, value);
+                    if (record) nextVideos[record.exerciseKey] = record;
+                });
+                exerciseVideos = nextVideos;
+            } catch (error) {
+                console.warn("Could not load exercise videos from local storage", error);
+                exerciseVideos = {};
+            }
+        }
+
+        function saveLocalExerciseVideos() {
+            try {
+                localStorage.setItem(getExerciseVideoStorageKey(), JSON.stringify(exerciseVideos));
+            } catch (error) {
+                console.warn("Could not save exercise videos locally", error);
+            }
+        }
+
+        function getExerciseVideoStorageKey() {
+            return activeUser?.id
+                ? `${EXERCISE_VIDEO_STORAGE_KEY}:${activeUser.id}`
+                : EXERCISE_VIDEO_STORAGE_KEY;
+        }
+
+        function applyExerciseVideoRows(rows = []) {
+            const nextVideos = { ...exerciseVideos };
+            rows.forEach(row => {
+                const record = normalizeExerciseVideoRecord(row.exercise_key, {
+                    youtube_url: row.youtube_url,
+                    youtube_video_id: row.youtube_video_id,
+                    updated_at: row.updated_at
+                });
+                if (record) nextVideos[record.exerciseKey] = record;
+            });
+            exerciseVideos = nextVideos;
+            saveLocalExerciseVideos();
+        }
+
+        async function persistExerciseVideo(record) {
+            const client = getSupabaseClient();
+            if (!client || !activeUser) return false;
+
+            const { error } = await client
+                .from("exercise_videos")
+                .upsert({
+                    user_id: activeUser.id,
+                    exercise_key: record.exerciseKey,
+                    youtube_url: record.url,
+                    youtube_video_id: record.videoId,
+                    updated_at: record.updatedAt
+                }, { onConflict: "user_id,exercise_key" });
+
+            if (error) {
+                console.error("Failed to save exercise video", error);
+                return false;
+            }
+
+            return true;
+        }
+
+        async function removeExerciseVideoFromSupabase(exerciseKey) {
+            const client = getSupabaseClient();
+            if (!client || !activeUser) return false;
+
+            const { error } = await client
+                .from("exercise_videos")
+                .delete()
+                .eq("user_id", activeUser.id)
+                .eq("exercise_key", exerciseKey);
+
+            if (error) {
+                console.error("Failed to delete exercise video", error);
+                return false;
+            }
+
+            return true;
+        }
+
+        function openExerciseVideoEditor(exId) {
+            const exercise = findExerciseById(exId);
+            if (!exercise) return;
+
+            activeVideoEditorKey = getExerciseVideoKey(exercise);
+            renderExercises(workoutData[activeDayKey]);
+            setTimeout(() => {
+                document.getElementById(getExerciseVideoInputId(activeVideoEditorKey))?.focus();
+            }, 0);
+        }
+
+        function cancelExerciseVideoEdit() {
+            activeVideoEditorKey = null;
+            renderExercises(workoutData[activeDayKey]);
+        }
+
+        function handleVideoInputKeydown(event, exId) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                saveExerciseVideo(exId);
+            }
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                cancelExerciseVideoEdit();
+            }
+        }
+
+        async function saveExerciseVideo(exId) {
+            const exercise = findExerciseById(exId);
+            if (!exercise) return;
+
+            const exerciseKey = getExerciseVideoKey(exercise);
+            const input = document.getElementById(getExerciseVideoInputId(exerciseKey));
+            let parsed;
+
+            try {
+                parsed = parseYouTubeUrl(input?.value || "");
+            } catch (_error) {
+                showToast("رابط غير مدعوم", "أضف رابط YouTube أو Short صحيحا.", "error");
+                return;
+            }
+
+            const record = {
+                exerciseKey,
+                url: parsed.url,
+                videoId: parsed.videoId,
+                updatedAt: new Date().toISOString()
+            };
+
+            exerciseVideos[exerciseKey] = record;
+            saveLocalExerciseVideos();
+            activeVideoEditorKey = null;
+            renderExercises(workoutData[activeDayKey]);
+
+            const saved = await persistExerciseVideo(record);
+            showToast(
+                saved ? "تم حفظ الفيديو" : "تم حفظ الفيديو محليا",
+                saved
+                    ? "سيظهر الفيديو داخل التمرين من حسابك في Supabase."
+                    : "الرابط محفوظ على هذا الجهاز فقط حتى يتاح اتصال Supabase."
+            );
+        }
+
+        async function deleteExerciseVideo(exId) {
+            const exercise = findExerciseById(exId);
+            if (!exercise) return;
+
+            const exerciseKey = getExerciseVideoKey(exercise);
+            delete exerciseVideos[exerciseKey];
+            saveLocalExerciseVideos();
+            activeVideoEditorKey = null;
+            renderExercises(workoutData[activeDayKey]);
+
+            const deleted = await removeExerciseVideoFromSupabase(exerciseKey);
+            showToast(
+                deleted ? "تم حذف الفيديو" : "تم حذف الفيديو محليا",
+                deleted
+                    ? "تم حذف الرابط من حسابك في Supabase."
+                    : "تم حذف الرابط من هذا الجهاز، وتعذر تحديث Supabase الآن."
+            );
         }
 
         function updateProgress() {
@@ -601,6 +1475,7 @@
             workoutData[activeDayKey].exercises.forEach(ex => {
                 checkedSets[ex.id] = Array(ex.sets).fill(false);
             });
+            latestSessionAnalysis = null;
             renderExercises(workoutData[activeDayKey]);
             updateProgress();
             skipTimer();
@@ -681,13 +1556,863 @@
             document.getElementById("water-result-side").innerText = waterText;
         }
 
+        function collectSessionData() {
+            const now = new Date();
+            const dayData = workoutData[activeDayKey];
+            const exercises = dayData.exercises.map(ex => {
+                const sets = checkedSets[ex.id] || Array(ex.sets).fill(false);
+                const completedSets = sets.filter(Boolean).length;
+                return {
+                    name: ex.name,
+                    target: ex.target,
+                    plannedSets: ex.sets,
+                    completedSets,
+                    restSeconds: ex.rest,
+                    reps: ex.reps,
+                    note: ex.note,
+                    completed: completedSets === ex.sets
+                };
+            });
+
+            const totalSets = exercises.reduce((sum, ex) => sum + ex.plannedSets, 0);
+            const completedSets = exercises.reduce((sum, ex) => sum + ex.completedSets, 0);
+            const completedExercises = exercises.filter(ex => ex.completed).length;
+
+            return {
+                date: now.toISOString(),
+                dateKey: getLocalDateKey(now),
+                dayKey: activeDayKey,
+                title: dayData.title,
+                focus: dayData.badge,
+                currentWeight,
+                totals: {
+                    completedSets,
+                    totalSets,
+                    completedExercises,
+                    totalExercises: exercises.length,
+                    completionPercent: Math.round((completedSets / totalSets) * 100)
+                },
+                exercises
+            };
+        }
+
+        function renderSessionAnalysis(analysis) {
+            const output = document.getElementById("session-analysis-output");
+            const positives = Array.isArray(analysis.positives) ? analysis.positives : [];
+            const cautions = Array.isArray(analysis.cautions) ? analysis.cautions : [];
+            const nextFocus = Array.isArray(analysis.nextFocus) ? analysis.nextFocus : [];
+            const score = Number.isFinite(Number(analysis.score)) ? Number(analysis.score) : null;
+            const calories = analysis.estimatedCaloriesBurned || {};
+            const fullAnalysis = analysis.fullAnalysis || {};
+            const analysisRows = [
+                ["الالتزام", fullAnalysis.adherence],
+                ["الحجم التدريبي", fullAnalysis.volume],
+                ["الشدة", fullAnalysis.intensity],
+                ["توازن العضلات", fullAnalysis.muscleBalance],
+                ["الاستشفاء", fullAnalysis.recovery],
+                ["التطور القادم", fullAnalysis.progression]
+            ].filter(([, value]) => value);
+
+            output.innerHTML = `
+                <div class="flex items-center justify-between gap-3">
+                    <strong class="text-stone-950">${analysis.summary || "تم تحليل الحصة."}</strong>
+                    ${score === null ? "" : `<span class="rounded-lg bg-stone-950 px-2 py-1 text-xs font-bold text-white">${score}/10</span>`}
+                </div>
+                ${calories.kcal ? `
+                    <div class="mt-4 rounded-lg border border-stone-200 bg-white p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-xs font-bold text-stone-500">السعرات المحروقة تقديريا</span>
+                            <strong class="text-xl text-stone-950">${calories.kcal} kcal</strong>
+                        </div>
+                        <p class="mt-2 text-xs leading-6 text-stone-500">${calories.low || calories.kcal} - ${calories.high || calories.kcal} kcal · ${calories.basis || "تقدير حسب المجموعات والوزن الحالي."}</p>
+                    </div>
+                ` : ""}
+                ${analysisRows.length ? `
+                    <div class="mt-4 grid gap-2">
+                        ${analysisRows.map(([label, value]) => `
+                            <div class="rounded-lg border border-stone-200 bg-white p-3">
+                                <span class="text-xs font-bold text-stone-500">${label}</span>
+                                <p class="mt-1 text-sm leading-7 text-stone-700">${value}</p>
+                            </div>
+                        `).join("")}
+                    </div>
+                ` : ""}
+                <div class="mt-3 grid gap-3">
+                    ${positives.length ? `<div><span class="text-xs font-bold text-green-700">نقاط جيدة</span><ul class="mt-1 list-disc pr-5 text-stone-600">${positives.map(item => `<li>${item}</li>`).join("")}</ul></div>` : ""}
+                    ${cautions.length ? `<div><span class="text-xs font-bold text-amber-700">ملاحظات</span><ul class="mt-1 list-disc pr-5 text-stone-600">${cautions.map(item => `<li>${item}</li>`).join("")}</ul></div>` : ""}
+                    ${nextFocus.length ? `<div><span class="text-xs font-bold text-blue-700">الحصة القادمة</span><ul class="mt-1 list-disc pr-5 text-stone-600">${nextFocus.map(item => `<li>${item}</li>`).join("")}</ul></div>` : ""}
+                </div>
+            `;
+        }
+
+        async function analyzeSession() {
+            const button = document.getElementById("analyze-session-button");
+            const output = document.getElementById("session-analysis-output");
+            const session = collectSessionData();
+
+            if (session.totals.completedSets === 0) {
+                showToast("لا توجد مجموعات مسجلة", "سجل مجموعة واحدة على الأقل قبل تحليل الحصة.", "error");
+                return;
+            }
+
+            if (button) {
+                button.disabled = true;
+                button.classList.add("opacity-70", "cursor-not-allowed");
+            }
+            output.innerHTML = `<div class="flex items-center gap-2 text-stone-700"><span class="w-2 h-2 rounded-lg bg-lime-300 animate-pulse"></span>جاري تحليل ${session.totals.completedSets} من ${session.totals.totalSets} مجموعة...</div>`;
+
+            try {
+                const analysis = await callSessionAnalysisProxy(session);
+                latestSessionAnalysis = analysis;
+                renderSessionAnalysis(analysis);
+                const saved = await saveCurrentSession(analysis, { silent: true, session });
+                showToast(
+                    saved ? "تم تحليل وحفظ الحصة" : "تم تحليل الحصة",
+                    saved ? "تم تحديث سجل التدريب في Supabase." : "ظهرت ملاحظات Gemini في لوحة تحليل الحصة."
+                );
+            } catch (error) {
+                console.error("Session analysis failed", error);
+                output.textContent = "تعذر تحليل الحصة الآن. تأكد من اتصال Supabase/Gemini ثم حاول مرة أخرى.";
+                showToast("فشل تحليل الحصة", "لم يتمكن الخادم من إرسال بيانات التمرين إلى Gemini.", "error");
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove("opacity-70", "cursor-not-allowed");
+                }
+            }
+        }
+
+        function getSupabaseSettings() {
+            return {
+                url: (appConfig.SUPABASE_URL || "").trim(),
+                key: (appConfig.SUPABASE_ANON_KEY || appConfig.SUPABASE_PUBLISHABLE_KEY || "").trim()
+            };
+        }
+
+        function getSupabaseClient() {
+            const settings = getSupabaseSettings();
+            if (!settings.url || !settings.key || !window.supabase) return null;
+            if (!supabaseClient) {
+                supabaseClient = window.supabase.createClient(settings.url, settings.key);
+            }
+            return supabaseClient;
+        }
+
+        async function initializeSupabaseHistory() {
+            setAppView(false);
+            renderLoginAuthPanel();
+            renderHistoryAuthPanel();
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            const { data, error } = await client.auth.getSession();
+            if (error) {
+                console.warn("Supabase session check failed", error);
+                renderHistoryAuthPanel("تعذر قراءة جلسة Supabase الحالية.");
+                return;
+            }
+
+            activeUser = data.session?.user || null;
+            setAppView(Boolean(activeUser));
+            renderHistoryAuthPanel();
+            renderLoginAuthPanel();
+            if (activeUser) await loadDashboardHistory();
+
+            if (!authListenerReady) {
+                authListenerReady = true;
+                client.auth.onAuthStateChange(async (_event, session) => {
+                    activeUser = session?.user || null;
+                    setAppView(Boolean(activeUser));
+                    renderHistoryAuthPanel();
+                    renderLoginAuthPanel();
+                    if (activeUser) {
+                        await loadDashboardHistory();
+                    } else {
+                        trainingHistory = [];
+                        inbodyHistory = [];
+                        activeVideoEditorKey = null;
+                        renderContributionGraph();
+                        renderInbodyHistory();
+                    }
+                });
+            }
+        }
+
+        function renderHistoryAuthPanel(message = "") {
+            const panel = document.getElementById("history-auth-panel");
+            if (!panel) return;
+
+            const settings = getSupabaseSettings();
+            if (!window.supabase) {
+                panel.innerHTML = `
+                    <div class="flex items-start gap-3 text-sm text-rose-700">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+                        <span>تعذر تحميل مكتبة Supabase من المتصفح.</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            if (!settings.url || !settings.key) {
+                panel.innerHTML = `
+                    <div class="flex items-start gap-3 text-sm text-amber-700">
+                        <i data-lucide="key-round" class="w-5 h-5 shrink-0"></i>
+                        <span>أضف مفتاح Supabase العام في <strong>config.js</strong> داخل <strong>SUPABASE_ANON_KEY</strong> لتفعيل الحفظ.</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            if (activeUser) {
+                const email = escapeHtml(activeUser.email || "مستخدم Supabase");
+                panel.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="icon-box bg-white"><i data-lucide="shield-check" class="w-5 h-5 text-green-700"></i></span>
+                            <div>
+                                <div class="text-sm font-extrabold text-stone-900">متصل بـ Supabase</div>
+                                <div class="text-xs text-stone-500 mt-1">${email}</div>
+                            </div>
+                        </div>
+                        <button onclick="signOutDashboard()" class="ghost-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            تسجيل الخروج
+                        </button>
+                    </div>
+                    ${message ? `<p class="mt-3 text-xs text-stone-500">${escapeHtml(message)}</p>` : ""}
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            panel.innerHTML = `
+                ${renderAuthFormMarkup(message)}
+            `;
+            lucide.createIcons();
+        }
+
+        function renderLoginAuthPanel(message = "") {
+            const panel = document.getElementById("login-auth-panel");
+            if (!panel) return;
+
+            const settings = getSupabaseSettings();
+            if (!window.supabase) {
+                panel.innerHTML = `
+                    <div class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm leading-7 text-rose-700">
+                        تعذر تحميل مكتبة Supabase من المتصفح.
+                    </div>
+                `;
+                return;
+            }
+
+            if (!settings.url || !settings.key) {
+                panel.innerHTML = `
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-800">
+                        أضف مفتاح Supabase العام في config.js داخل SUPABASE_ANON_KEY لتفعيل الدخول.
+                    </div>
+                `;
+                return;
+            }
+
+            if (activeUser) {
+                panel.innerHTML = `
+                    <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm leading-7 text-green-800">
+                        تم تسجيل الدخول. يتم فتح لوحة التدريب الآن.
+                    </div>
+                `;
+                return;
+            }
+
+            panel.innerHTML = renderAuthFormMarkup(message, "login");
+            lucide.createIcons();
+        }
+
+        function renderAuthFormMarkup(message = "", context = "dashboard") {
+            const passwordGrid = context === "login" ? "grid-cols-1" : "lg:grid-cols-[1fr_220px]";
+            const magicGrid = context === "login" ? "grid-cols-1" : "lg:grid-cols-[1fr_auto]";
+            const buttonWidth = context === "login" ? "w-full" : "";
+            return `
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex rounded-lg border border-stone-300 bg-white p-1">
+                        <button onclick="setAuthMode('magic')" class="${authMode === "magic" ? "ink-button" : "ghost-button border-0"} h-9 px-3 text-xs font-extrabold cursor-pointer">
+                            رابط بريد
+                        </button>
+                        <button onclick="setAuthMode('password')" class="${authMode === "password" ? "ink-button" : "ghost-button border-0"} h-9 px-3 text-xs font-extrabold cursor-pointer">
+                            كلمة مرور
+                        </button>
+                    </div>
+                    <span class="text-xs text-stone-500">${authMode === "magic" ? "دخول بدون كلمة مرور عبر رابط آمن." : "دخول أو إنشاء حساب بالبريد وكلمة مرور."}</span>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 ${authMode === "password" ? passwordGrid : magicGrid} gap-3 items-end">
+                    <label class="block">
+                        <span class="text-xs font-bold text-stone-600">البريد الإلكتروني</span>
+                        <input id="supabase-email-input" type="email" autocomplete="email" class="mt-2 h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm font-bold" placeholder="you@example.com">
+                    </label>
+                    ${authMode === "password" ? `
+                        <label class="block">
+                            <span class="text-xs font-bold text-stone-600">كلمة المرور</span>
+                            <input id="supabase-password-input" type="password" autocomplete="current-password" class="mt-2 h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-sm font-bold" placeholder="••••••••">
+                        </label>
+                    ` : `
+                        <button id="supabase-login-button" onclick="sendLoginLink()" class="ink-button ${buttonWidth} h-11 px-4 text-sm font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                            إرسال رابط الدخول
+                        </button>
+                    `}
+                </div>
+
+                ${authMode === "password" ? `
+                    <div class="mt-3 grid grid-cols-1 ${context === "login" ? "sm:grid-cols-2" : "sm:grid-cols-[auto_auto]"} gap-2">
+                        <button id="supabase-login-button" onclick="signInWithEmailPassword()" class="ink-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                            <i data-lucide="log-in" class="w-4 h-4"></i>
+                            تسجيل الدخول
+                        </button>
+                        <button id="supabase-signup-button" onclick="signUpWithEmailPassword()" class="lime-button h-10 px-3 text-xs font-extrabold cursor-pointer flex items-center justify-center gap-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            إنشاء حساب
+                        </button>
+                    </div>
+                ` : ""}
+                ${message ? `<p class="mt-3 text-xs text-stone-500">${escapeHtml(message)}</p>` : ""}
+            `;
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode === "password" ? "password" : "magic";
+            renderLoginAuthPanel();
+            renderHistoryAuthPanel();
+        }
+
+        function setAppView(isAuthenticated) {
+            const loginView = document.getElementById("login-view");
+            const dashboardView = document.getElementById("dashboard-view");
+            if (!loginView || !dashboardView) return;
+
+            loginView.classList.toggle("is-hidden", isAuthenticated);
+            dashboardView.classList.toggle("is-hidden", !isAuthenticated);
+            if (isAuthenticated) {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function scrollToAuthPanel() {
+            const panel = document.getElementById("history-auth-panel");
+            if (!panel) return;
+
+            panel.scrollIntoView({ behavior: "smooth", block: "center" });
+            panel.style.boxShadow = "0 0 0 4px rgba(217, 255, 104, 0.55)";
+            setTimeout(() => {
+                panel.style.boxShadow = "";
+                document.getElementById("supabase-email-input")?.focus();
+            }, 450);
+        }
+
+        function getEmailAuthInput() {
+            return (document.getElementById("supabase-email-input")?.value || "").trim();
+        }
+
+        function getPasswordAuthInput() {
+            return document.getElementById("supabase-password-input")?.value || "";
+        }
+
+        function validateEmailInput(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function setAuthButtonsDisabled(isDisabled) {
+            ["supabase-login-button", "supabase-signup-button"].forEach(id => {
+                const button = document.getElementById(id);
+                if (!button) return;
+                button.disabled = isDisabled;
+                button.classList.toggle("opacity-70", isDisabled);
+                button.classList.toggle("cursor-not-allowed", isDisabled);
+            });
+        }
+
+        async function sendLoginLink() {
+            const client = getSupabaseClient();
+            const email = getEmailAuthInput();
+
+            if (!client) {
+                showToast("Supabase غير جاهز", "أضف المفتاح العام في config.js أولا.", "error");
+                return;
+            }
+
+            if (!validateEmailInput(email)) {
+                showToast("بريد غير صحيح", "أدخل بريدك لتسجيل الدخول إلى Supabase.", "error");
+                return;
+            }
+
+            setAuthButtonsDisabled(true);
+            try {
+                const redirectTo = window.location.href.split("#")[0];
+                const { error } = await client.auth.signInWithOtp({
+                    email,
+                    options: { emailRedirectTo: redirectTo }
+                });
+
+                if (error) throw error;
+                renderLoginAuthPanel("تم إرسال رابط الدخول. افتح البريد ثم ارجع لهذه الصفحة.");
+                renderHistoryAuthPanel("تم إرسال رابط الدخول. افتح البريد ثم ارجع لهذه الصفحة.");
+                showToast("تم إرسال رابط الدخول", "بعد فتح الرابط سيتم تحميل السجل تلقائيا.");
+            } catch (error) {
+                console.error("Supabase login failed", error);
+                showToast("تعذر إرسال رابط الدخول", "راجع إعدادات Auth أو المفتاح العام في Supabase.", "error");
+            } finally {
+                setAuthButtonsDisabled(false);
+            }
+        }
+
+        async function signInWithEmailPassword() {
+            await submitEmailPasswordAuth("sign_in");
+        }
+
+        async function signUpWithEmailPassword() {
+            await submitEmailPasswordAuth("sign_up");
+        }
+
+        async function submitEmailPasswordAuth(action) {
+            const client = getSupabaseClient();
+            const email = getEmailAuthInput();
+            const password = getPasswordAuthInput();
+
+            if (!client) {
+                showToast("Supabase غير جاهز", "أضف المفتاح العام في config.js أولا.", "error");
+                return;
+            }
+
+            if (!validateEmailInput(email)) {
+                showToast("بريد غير صحيح", "أدخل بريدك لتسجيل الدخول إلى Supabase.", "error");
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast("كلمة مرور قصيرة", "استخدم 6 أحرف على الأقل.", "error");
+                return;
+            }
+
+            setAuthButtonsDisabled(true);
+            try {
+                const redirectTo = window.location.href.split("#")[0];
+                const result = action === "sign_up"
+                    ? await client.auth.signUp({
+                        email,
+                        password,
+                        options: { emailRedirectTo: redirectTo }
+                    })
+                    : await client.auth.signInWithPassword({ email, password });
+
+                if (result.error) throw result.error;
+
+                if (result.data.session?.user) {
+                    activeUser = result.data.session.user;
+                    setAppView(true);
+                    renderLoginAuthPanel();
+                    renderHistoryAuthPanel();
+                    await loadDashboardHistory();
+                    showToast("تم تسجيل الدخول", "تم تحميل سجل التدريب وقياسات InBody.");
+                    return;
+                }
+
+                renderLoginAuthPanel("تم إنشاء الحساب. إذا كان تأكيد البريد مفعلا، افتح رسالة Supabase لإكمال الدخول.");
+                renderHistoryAuthPanel("تم إنشاء الحساب. إذا كان تأكيد البريد مفعلا، افتح رسالة Supabase لإكمال الدخول.");
+                showToast("راجع بريدك", "قد تحتاج لتأكيد البريد قبل حفظ البيانات.");
+            } catch (error) {
+                console.error("Supabase email auth failed", error);
+                showToast(
+                    action === "sign_up" ? "تعذر إنشاء الحساب" : "تعذر تسجيل الدخول",
+                    "راجع البريد وكلمة المرور وإعدادات Email Auth في Supabase.",
+                    "error"
+                );
+            } finally {
+                setAuthButtonsDisabled(false);
+            }
+        }
+
+        async function signOutDashboard() {
+            const client = getSupabaseClient();
+            if (!client) return;
+
+            await client.auth.signOut();
+            activeUser = null;
+            trainingHistory = [];
+            inbodyHistory = [];
+            setAppView(false);
+            renderLoginAuthPanel();
+            renderHistoryAuthPanel();
+            renderContributionGraph();
+            renderInbodyHistory();
+            showToast("تم تسجيل الخروج", "تم إخفاء السجل المحفوظ من هذه الصفحة.");
+        }
+
+        async function loadDashboardHistory() {
+            const client = getSupabaseClient();
+            if (!client || !activeUser) return false;
+
+            loadLocalExerciseVideos();
+
+            const [sessionsResult, inbodyResult, videosResult] = await Promise.all([
+                client
+                    .from("training_sessions")
+                    .select("*")
+                    .eq("user_id", activeUser.id)
+                    .order("session_date", { ascending: true })
+                    .order("created_at", { ascending: true }),
+                client
+                    .from("inbody_measurements")
+                    .select("*")
+                    .eq("user_id", activeUser.id)
+                    .order("measurement_date", { ascending: false })
+                    .order("measured_at", { ascending: false }),
+                client
+                    .from("exercise_videos")
+                    .select("exercise_key,youtube_url,youtube_video_id,updated_at")
+                    .eq("user_id", activeUser.id)
+                    .order("updated_at", { ascending: false })
+            ]);
+
+            if (sessionsResult.error || inbodyResult.error) {
+                console.error("Failed to load dashboard history", sessionsResult.error || inbodyResult.error);
+                renderHistoryAuthPanel("تعذر تحميل السجل. تحقق من سياسات RLS والمفتاح العام.");
+                return false;
+            }
+
+            if (videosResult.error) {
+                console.warn("Failed to load exercise videos", videosResult.error);
+                showToast("تعذر تحميل فيديوهات التمارين", "ستبقى الروابط المحلية متاحة على هذا الجهاز.", "error");
+            } else {
+                applyExerciseVideoRows(videosResult.data || []);
+            }
+
+            trainingHistory = sessionsResult.data || [];
+            inbodyHistory = inbodyResult.data || [];
+            applyLatestInbodyMeasurement();
+            renderDashboard();
+            renderContributionGraph();
+            renderInbodyHistory();
+            renderExercises(workoutData[activeDayKey]);
+            renderHistoryAuthPanel();
+            return true;
+        }
+
+        async function saveCurrentSession(analysis = latestSessionAnalysis, options = {}) {
+            const session = options.session || collectSessionData();
+            const silent = Boolean(options.silent);
+            const button = document.getElementById("save-session-button");
+
+            if (session.totals.completedSets === 0) {
+                if (!silent) showToast("لا توجد مجموعات مسجلة", "سجل مجموعة واحدة على الأقل قبل حفظ الحصة.", "error");
+                return false;
+            }
+
+            const client = getSupabaseClient();
+            if (!client || !activeUser) {
+                if (!silent) showToast("سجل الدخول أولا", "استخدم بريد Supabase في لوحة سجل الالتزام لحفظ الحصص.", "error");
+                return false;
+            }
+
+            button.disabled = true;
+            button.classList.add("opacity-70", "cursor-not-allowed");
+
+            try {
+                const row = buildTrainingSessionRow(session, analysis);
+                const { data, error } = await client
+                    .from("training_sessions")
+                    .upsert(row, { onConflict: "user_id,session_key" })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                mergeTrainingSession(data);
+                renderContributionGraph();
+                if (!silent) showToast("تم حفظ الحصة", "تم تحديث سجل التدريب وخريطة الالتزام.");
+                return true;
+            } catch (error) {
+                console.error("Failed to save session", error);
+                if (!silent) showToast("تعذر حفظ الحصة", "راجع تسجيل الدخول أو سياسات Supabase RLS.", "error");
+                return false;
+            } finally {
+                button.disabled = false;
+                button.classList.remove("opacity-70", "cursor-not-allowed");
+            }
+        }
+
+        async function saveInbodyMeasurement(source = "inbody_upload", options = {}) {
+            const silent = Boolean(options.silent);
+            const client = getSupabaseClient();
+
+            if (!client || !activeUser) {
+                if (!silent) showToast("سجل الدخول أولا", "استخدم بريد Supabase في لوحة سجل الالتزام لحفظ القياس.", "error");
+                return false;
+            }
+
+            const row = {
+                user_id: activeUser.id,
+                measurement_date: getLocalDateKey(),
+                measured_at: new Date().toISOString(),
+                weight: Number(currentWeight),
+                visceral_fat: Number.isFinite(Number(visceralFat)) ? Number(visceralFat) : null,
+                body_age: Number.isFinite(Number(bodyAge)) ? Math.round(Number(bodyAge)) : null,
+                source,
+                raw_payload: {
+                    weight: Number(currentWeight),
+                    visceralFat: Number(visceralFat),
+                    bodyAge: Number(bodyAge),
+                    source
+                }
+            };
+
+            try {
+                const { data, error } = await client
+                    .from("inbody_measurements")
+                    .insert(row)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                inbodyHistory = [data, ...inbodyHistory].sort((a, b) => {
+                    const dateA = new Date(a.measured_at || `${a.measurement_date}T00:00:00`).getTime();
+                    const dateB = new Date(b.measured_at || `${b.measurement_date}T00:00:00`).getTime();
+                    return dateB - dateA;
+                });
+                renderInbodyHistory();
+                return true;
+            } catch (error) {
+                console.error("Failed to save InBody measurement", error);
+                if (!silent) showToast("تعذر حفظ القياس", "راجع تسجيل الدخول أو سياسات Supabase RLS.", "error");
+                return false;
+            }
+        }
+
+        function buildTrainingSessionRow(session, analysis) {
+            const sessionKey = `${session.dateKey}_${session.dayKey}`;
+            const calories = analysis?.estimatedCaloriesBurned?.kcal;
+            const score = analysis?.score;
+
+            return {
+                user_id: activeUser.id,
+                session_key: sessionKey,
+                session_date: session.dateKey,
+                day_key: session.dayKey,
+                title: session.title,
+                focus: session.focus,
+                current_weight: Number(session.currentWeight) || null,
+                completed_sets: session.totals.completedSets,
+                total_sets: session.totals.totalSets,
+                completed_exercises: session.totals.completedExercises,
+                total_exercises: session.totals.totalExercises,
+                completion_percent: session.totals.completionPercent,
+                calories_kcal: Number.isFinite(Number(calories)) ? Math.round(Number(calories)) : null,
+                score: Number.isFinite(Number(score)) ? Number(score) : null,
+                session_payload: session,
+                analysis_payload: analysis || null,
+                updated_at: new Date().toISOString()
+            };
+        }
+
+        function mergeTrainingSession(savedSession) {
+            if (!savedSession) return;
+            const index = trainingHistory.findIndex(item => item.session_key === savedSession.session_key);
+            if (index >= 0) {
+                trainingHistory[index] = savedSession;
+            } else {
+                trainingHistory.push(savedSession);
+            }
+            trainingHistory.sort((a, b) => String(a.session_date).localeCompare(String(b.session_date)));
+        }
+
+        function applyLatestInbodyMeasurement() {
+            if (!inbodyHistory.length) return;
+            const latest = inbodyHistory[0];
+            currentWeight = Number(latest.weight) || currentWeight;
+            visceralFat = latest.visceral_fat === null ? visceralFat : Number(latest.visceral_fat) || visceralFat;
+            bodyAge = latest.body_age === null ? bodyAge : Number(latest.body_age) || bodyAge;
+        }
+
+        function renderContributionGraph() {
+            const graph = document.getElementById("training-contribution-graph");
+            if (!graph) return;
+
+            const byDate = new Map();
+            trainingHistory.forEach(session => {
+                const key = String(session.session_date || "").slice(0, 10);
+                if (!key) return;
+                const current = byDate.get(key) || { sets: 0, sessions: 0, calories: 0 };
+                current.sets += Number(session.completed_sets) || 0;
+                current.sessions += 1;
+                current.calories += Number(session.calories_kcal) || 0;
+                byDate.set(key, current);
+            });
+
+            const today = new Date();
+            today.setHours(12, 0, 0, 0);
+            const start = new Date(today);
+            start.setDate(today.getDate() - 111);
+            start.setDate(start.getDate() - start.getDay());
+
+            const cells = [];
+            const cursor = new Date(start);
+            while (cursor <= today) {
+                const key = getLocalDateKey(cursor);
+                const value = byDate.get(key) || { sets: 0, sessions: 0, calories: 0 };
+                const level = getContributionLevel(value.sets);
+                const label = value.sets > 0
+                    ? `${key}: ${value.sets} مجموعات، ${value.sessions} حصة`
+                    : `${key}: بدون تمرين محفوظ`;
+                cells.push(`<span class="contribution-cell level-${level}" title="${escapeHtml(label)}"></span>`);
+                cursor.setDate(cursor.getDate() + 1);
+            }
+
+            graph.innerHTML = cells.join("");
+
+            const trainedDays = [...byDate.values()].filter(item => item.sets > 0).length;
+            const totalSets = [...byDate.values()].reduce((sum, item) => sum + item.sets, 0);
+            const streak = calculateTrainingStreak(byDate);
+            document.getElementById("history-days-count").innerText = trainedDays;
+            document.getElementById("history-sets-count").innerText = totalSets;
+            document.getElementById("history-streak-count").innerText = `${streak} يوم`;
+            document.getElementById("history-range-label").innerText = `${formatDateLabel(getLocalDateKey(start))} - ${formatDateLabel(getLocalDateKey(today))}`;
+        }
+
+        function renderInbodyHistory() {
+            const summary = document.getElementById("inbody-latest-summary");
+            const list = document.getElementById("inbody-history-list");
+            if (!summary || !list) return;
+
+            if (!inbodyHistory.length) {
+                summary.innerHTML = "لا توجد قياسات محفوظة بعد.";
+                list.innerHTML = "";
+                return;
+            }
+
+            const latest = inbodyHistory[0];
+            const previous = inbodyHistory[1];
+            summary.innerHTML = `
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-stone-500">آخر قياس</span>
+                    <strong class="text-stone-950">${formatDateLabel(latest.measurement_date)}</strong>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-2">
+                    <div>
+                        <span class="text-[11px] text-stone-500">وزن</span>
+                        <strong class="block text-lg text-stone-950">${Number(latest.weight).toFixed(2)}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-stone-500">حشوية</span>
+                        <strong class="block text-lg text-stone-950">${latest.visceral_fat ?? "-"}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-stone-500">عمر</span>
+                        <strong class="block text-lg text-stone-950">${latest.body_age ?? "-"}</strong>
+                    </div>
+                </div>
+                ${previous ? `<div class="mt-3 text-xs text-stone-500">مقارنة بآخر قياس: ${formatDelta(latest.weight, previous.weight, "كجم")}</div>` : ""}
+            `;
+
+            list.innerHTML = inbodyHistory.slice(0, 6).map((item, index) => {
+                const prev = inbodyHistory[index + 1];
+                return `
+                    <article class="rounded-lg border border-stone-200 bg-white p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <strong class="text-sm text-stone-950">${formatDateLabel(item.measurement_date)}</strong>
+                            <span class="text-[11px] text-stone-500">${escapeHtml(item.source || "inbody_upload")}</span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                                <span class="text-stone-500">الوزن</span>
+                                <strong class="block text-sm text-stone-900">${Number(item.weight).toFixed(2)}</strong>
+                                ${prev ? `<span>${formatDelta(item.weight, prev.weight, "كجم")}</span>` : ""}
+                            </div>
+                            <div>
+                                <span class="text-stone-500">الحشوية</span>
+                                <strong class="block text-sm text-stone-900">${item.visceral_fat ?? "-"}</strong>
+                                ${prev && item.visceral_fat !== null && prev.visceral_fat !== null ? `<span>${formatDelta(item.visceral_fat, prev.visceral_fat, "")}</span>` : ""}
+                            </div>
+                            <div>
+                                <span class="text-stone-500">العمر</span>
+                                <strong class="block text-sm text-stone-900">${item.body_age ?? "-"}</strong>
+                                ${prev && item.body_age !== null && prev.body_age !== null ? `<span>${formatDelta(item.body_age, prev.body_age, "سنة")}</span>` : ""}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function getContributionLevel(sets) {
+            if (sets <= 0) return 0;
+            if (sets <= 4) return 1;
+            if (sets <= 9) return 2;
+            if (sets <= 15) return 3;
+            return 4;
+        }
+
+        function calculateTrainingStreak(byDate) {
+            let streak = 0;
+            const cursor = new Date();
+            cursor.setHours(12, 0, 0, 0);
+
+            while (true) {
+                const key = getLocalDateKey(cursor);
+                const value = byDate.get(key);
+                if (!value || value.sets <= 0) break;
+                streak += 1;
+                cursor.setDate(cursor.getDate() - 1);
+            }
+
+            return streak;
+        }
+
+        function formatDelta(current, previous, unit) {
+            const diff = Number(current) - Number(previous);
+            if (!Number.isFinite(diff) || Math.abs(diff) < 0.01) {
+                return `<span class="text-stone-400">0 ${unit}</span>`;
+            }
+
+            const sign = diff > 0 ? "+" : "";
+            const color = diff < 0 ? "text-green-700" : "text-rose-700";
+            const value = Math.abs(diff) >= 10 ? diff.toFixed(0) : diff.toFixed(1);
+            return `<span class="${color}">${sign}${value} ${unit}</span>`;
+        }
+
+        function formatDateLabel(dateKey) {
+            if (!dateKey) return "-";
+            return new Intl.DateTimeFormat("ar-EG", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }).format(new Date(`${dateKey}T12:00:00`));
+        }
+
+        function getLocalDateKey(date = new Date()) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                "\"": "&quot;",
+                "'": "&#039;"
+            }[char]));
+        }
+
         function showToast(title, desc, type = "success") {
             const toast = document.getElementById("toast");
             const toastIcon = document.getElementById("toast-icon");
             document.getElementById("toast-title").innerText = title;
             document.getElementById("toast-desc").innerText = desc;
             toastIcon.innerHTML = type === "success"
-                ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-700"></i>`
+                ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-green-700"></i>`
                 : `<i data-lucide="alert-triangle" class="w-5 h-5 text-rose-700"></i>`;
             toast.classList.remove("opacity-0", "-translate-y-6", "pointer-events-none");
             lucide.createIcons();
@@ -718,8 +2443,15 @@
                         if (result.visceralFat) visceralFat = result.visceralFat;
                         if (result.bodyAge) bodyAge = result.bodyAge;
                         renderDashboard();
+                        document.getElementById("loading-status").innerText = "جاري حفظ القياس في Supabase...";
+                        const saved = await saveInbodyMeasurement("inbody_upload", { silent: true });
                         overlay.classList.add("hidden");
-                        showToast("تم تحديث البيانات", `الوزن الجديد ${currentWeight} كجم، الدهون الحشوية ${visceralFat}، العمر الحيوي ${bodyAge}.`);
+                        showToast(
+                            saved ? "تم تحديث وحفظ البيانات" : "تم تحديث البيانات",
+                            saved
+                                ? `تم حفظ قياس InBody الجديد: ${currentWeight} كجم.`
+                                : `الوزن الجديد ${currentWeight} كجم. سجل الدخول لحفظ القياس في Supabase.`
+                        );
                     } else {
                         throw new Error("No readable weight returned.");
                     }
@@ -749,6 +2481,24 @@
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(text || "Proxy request failed.");
+            }
+            return await response.json();
+        }
+
+        async function callSessionAnalysisProxy(session) {
+            const endpoint = (appConfig.GEMINI_PROXY_URL || "").trim();
+            const model = (appConfig.GEMINI_MODEL || "gemini-3-flash-preview").trim();
+            if (!endpoint) throw new Error("Missing GEMINI_PROXY_URL.");
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: "session_analysis", session, model })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || "Session analysis request failed.");
             }
             return await response.json();
         }
