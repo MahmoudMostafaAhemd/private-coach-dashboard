@@ -994,6 +994,7 @@
         let authMode = "magic";
         let exerciseVideos = {};
         let activeVideoEditorKey = null;
+        let loadedHistoryUserId = null;
         const EXERCISE_VIDEO_STORAGE_KEY = "private_coach_exercise_videos_v1";
 
         const workoutData = {
@@ -1721,16 +1722,23 @@
             if (!authListenerReady) {
                 authListenerReady = true;
                 client.auth.onAuthStateChange(async (_event, session) => {
-                    activeUser = session?.user || null;
+                    const previousUserId = activeUser?.id || null;
+                    const nextUser = session?.user || null;
+                    const nextUserId = nextUser?.id || null;
+                    const isSameAuthenticatedUser = Boolean(previousUserId && nextUserId && previousUserId === nextUserId);
+                    activeUser = nextUser;
                     setAppView(Boolean(activeUser));
                     renderHistoryAuthPanel();
                     renderLoginAuthPanel();
                     if (activeUser) {
-                        await loadDashboardHistory();
+                        if (!isSameAuthenticatedUser || loadedHistoryUserId !== nextUserId) {
+                            await loadDashboardHistory();
+                        }
                     } else {
                         trainingHistory = [];
                         inbodyHistory = [];
                         activeVideoEditorKey = null;
+                        loadedHistoryUserId = null;
                         renderContributionGraph();
                         renderInbodyHistory();
                     }
@@ -1886,15 +1894,15 @@
             renderHistoryAuthPanel();
         }
 
-        function setAppView(isAuthenticated) {
+        function setAppView(isAuthenticated, options = {}) {
             const loginView = document.getElementById("login-view");
             const dashboardView = document.getElementById("dashboard-view");
             if (!loginView || !dashboardView) return;
 
             loginView.classList.toggle("is-hidden", isAuthenticated);
             dashboardView.classList.toggle("is-hidden", !isAuthenticated);
-            if (isAuthenticated) {
-                window.scrollTo(0, 0);
+            if (isAuthenticated && options.scrollToTop) {
+                window.scrollTo({ top: 0, left: 0, behavior: "auto" });
             }
         }
 
@@ -2009,7 +2017,7 @@
 
                 if (result.data.session?.user) {
                     activeUser = result.data.session.user;
-                    setAppView(true);
+                    setAppView(true, { scrollToTop: true });
                     renderLoginAuthPanel();
                     renderHistoryAuthPanel();
                     await loadDashboardHistory();
@@ -2040,6 +2048,7 @@
             activeUser = null;
             trainingHistory = [];
             inbodyHistory = [];
+            loadedHistoryUserId = null;
             setAppView(false);
             renderLoginAuthPanel();
             renderHistoryAuthPanel();
@@ -2089,6 +2098,7 @@
 
             trainingHistory = sessionsResult.data || [];
             inbodyHistory = inbodyResult.data || [];
+            loadedHistoryUserId = activeUser.id;
             applyLatestInbodyMeasurement();
             renderDashboard();
             renderContributionGraph();
